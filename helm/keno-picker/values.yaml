@@ -1,0 +1,32 @@
+namespace: services
+fullnameOverride: "keno-picker"
+replicaCount: 3
+
+image:
+  repository: kroyio/keno
+  pullPolicy: Always
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 4200
+  targetPort: 5000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: "keno.kroy.io"
+      paths:
+        - path: /
+          pathType: Prefix
+          service:
+            name: keno-picker
+            port: 4200
+  tls:
+    - hosts:
+        - "keno.kroy.io"
+      secretName: keno-kroy-io
+      
+resources: {}
+
