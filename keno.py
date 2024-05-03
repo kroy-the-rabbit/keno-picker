@@ -6,6 +6,26 @@ from time import sleep
 
 app = Flask(__name__)
 
+def parse_keno_numbers(s):
+    # Use a regular expression to find all sequences of digits in the string
+    numbers = re.findall(r'\d+', s)
+    valid_numbers = []
+
+    for number in numbers:
+        # Convert string to integer
+        num = int(number)
+
+        # Check if number is a valid keno number
+        if 1 <= num <= 80:
+            valid_numbers.append(num)
+
+            # Skip the length of this number in the loop to avoid overlapping
+            # (e.g., '54' in '154' should not allow '4' to be extracted again)
+            continue
+
+    return valid_numbers
+
+
 def fetch_seed():
     response = requests.get("https://rand.kroy.io")
     response.raise_for_status()
@@ -35,7 +55,7 @@ def random_numbers():
 
     sleep(count * .001)
     seed = fetch_seed()
-    alternate = generate_unique_random_numbers(seed, 4)
+    alternate = generate_unique_random_numbers(seed, count)
     
     heads_wins = flip_coin(574673)
     coin_flip = "A" if heads_wins else "B" 
