@@ -27,9 +27,19 @@ def parse_keno_numbers(s):
 
 
 def fetch_seed():
-    response = requests.get("https://rand.kroy.io")
-    response.raise_for_status()
-    return response.text
+    try:
+        # hardware random generator 1
+        response = requests.get("https://rand.kroy.io")
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.RequestException as e:
+        try:
+            # hardware random generator 2
+            random_org_response = requests.get("https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new")
+            random_org_response.raise_for_status()
+            return random_org_response.text
+        except requests.exceptions.RequestException as e:
+            return str(random.randint(1, 1000000000))
 
 def generate_unique_random_numbers(seed, count):
     random.seed(seed)
