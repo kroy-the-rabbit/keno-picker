@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 #
-docker build -t kroyio/keno .
-docker push kroyio/keno
+docker build -t kroyio/keno:latest .
+docker push kroyio/keno:latest
 
