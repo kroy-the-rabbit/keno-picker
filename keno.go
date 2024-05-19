@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	mrand "math/rand" # need to alias as we fallback to the crypto rand
+	mrand "math/rand" // need to alias as we fallback to the crypto rand
 
 	"github.com/gin-gonic/gin"
 )
