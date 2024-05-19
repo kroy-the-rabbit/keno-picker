@@ -17,12 +17,12 @@
 <body>
     <h2>Keno Picker</h2>
     Seed: {{.seed}}<br><hr><br>
-    Result A:<br> {{range .numbers}}<div>{{.}}</div>{{end}}
+    Result 1:<br> {{range .numbers}}<div>{{.}}</div>{{end}}
     <br><hr><br>
-    Result B:<br> {{range .alternate}}<div>{{.}}</div>{{end}}
+    Result 2:<br> {{range .alternate}}<div>{{.}}</div>{{end}}
     <br><hr><br>
     Three Spot:<br> {{range .threespot}}<div>{{.}}</div>{{end}}
     <br><hr><br>
-    Coin flip: {{if .coinFlip}}A{{else}}B{{end}}
+    Coin flip: {{if .coinFlip}}H{{else}}T{{end}}
 </body>
 </html>
