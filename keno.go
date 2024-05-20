@@ -89,13 +89,17 @@ func main() {
 		numbers := generateUniqueRandomNumbers(count)
 		threespot := generateUniqueRandomNumbers(3)
 		alternate := generateUniqueRandomNumbers(count)
+
 		// Generate a random number of flips between 1 and 1,000,000
 		maxFlips := big.NewInt(1000000)
 		n, err := rand.Int(rand.Reader, maxFlips)
 		if err != nil {
 			log.Fatalf("Failed to generate random number of flips: %v", err)
 		}
-		coinFlip := int(n.Int64()) + 1
+
+		two := big.NewInt(2)
+		remainder := new(big.Int).Mod(n, two)
+		flipped := remainder.Cmp(big.NewInt(0)) == 0
 
 		if jsonOutput == "1" {
 			c.JSON(http.StatusOK, gin.H{
@@ -103,7 +107,7 @@ func main() {
 				"numbers":   numbers,
 				"threespot": threespot,
 				"alternate": alternate,
-				"coinFlip":  coinFlip,
+				"coinFlip":  flipped,
 				"flipped":   n,
 			})
 		} else {
@@ -112,7 +116,7 @@ func main() {
 				"numbers":   numbers,
 				"alternate": alternate,
 				"threespot": threespot,
-				"coinFlip":  coinFlip,
+				"coinFlip":  flipped,
 				"flipped":   n,
 			})
 		}
