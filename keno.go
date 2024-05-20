@@ -2,7 +2,8 @@ package main
 
 import (
 	"crypto/rand"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
@@ -18,14 +19,24 @@ func fetchSeed() int64 {
 	resp, err := http.Get("https://rand.kroy.io")
 	if err == nil && resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err == nil {
-			seed, err := strconv.ParseInt(string(body), 10, 64)
-			if err == nil {
+			bigSeed := new(big.Int)
+			bigSeed, success := bigSeed.SetString(string(body), 16)
+			if success {
+				seed := bigSeed.Int64()
 				return seed
+			} else {
+				fmt.Println("Failed to parse hexadecimal seed as big integer")
 			}
+		} else {
+			fmt.Println("Error reading response body:", err)
 		}
+	} else {
+		fmt.Println("HTTP request failed:", err)
 	}
+
+	fmt.Println("Starting fallback seed generation")
 
 	// Fallback to crypto/rand for random number generation if HTTP request fails
 	n, err := rand.Int(rand.Reader, big.NewInt(1<<62))
@@ -34,9 +45,7 @@ func fetchSeed() int64 {
 	}
 	return n.Int64()
 }
-
-func generateUniqueRandomNumbers(seed int64, count int) []int {
-	mrand.Seed(seed) // Seed the math/rand number generator
+func generateUniqueRandomNumbers(count int) []int {
 	numbers := make([]int, 0, count)
 	seen := make(map[int]bool)
 	for len(numbers) < count {
@@ -49,8 +58,7 @@ func generateUniqueRandomNumbers(seed int64, count int) []int {
 	return numbers
 }
 
-func flipCoin(seed int64, times int) bool {
-	mrand.Seed(seed) // Seed the math/rand number generator
+func flipCoin(times int) bool {
 	headsCount := 0
 	for i := 0; i < times; i++ {
 		if mrand.Intn(2) == 0 { // 0 for heads, 1 for tails
@@ -72,29 +80,40 @@ func main() {
 			count = 4 // Default to 4 if any error occurs
 		}
 
-		jsonOutput := c.DefaultQuery("json", "0") // Check for json query parameter
-
+		jsonOutput := c.DefaultQuery("json", "0") // Check for json
 
 		seed := fetchSeed()
-		numbers := generateUniqueRandomNumbers(seed, count)
-		threespot := generateUniqueRandomNumbers(seed, 3)
-		alternate := generateUniqueRandomNumbers(seed, count)
-		coinFlip := flipCoin(seed, 574673)
+		fmt.Println("seed: ", seed)
+		mrand.Seed(seed)
+
+		numbers := generateUniqueRandomNumbers(count)
+		threespot := generateUniqueRandomNumbers(3)
+		alternate := generateUniqueRandomNumbers(count)
+		// Generate a random number of flips between 1 and 1,000,000
+		maxFlips := big.NewInt(1000000)
+		n, err := rand.Int(rand.Reader, maxFlips)
+		if err != nil {
+			log.Fatalf("Failed to generate random number of flips: %v", err)
+		}
+		coinFlip := int(n.Int64()) + 1
+
 		if jsonOutput == "1" {
 			c.JSON(http.StatusOK, gin.H{
-				"seed":        seed,
-				"numbers":     numbers,
-				"threespot":   threespot,
-				"alternate":   alternate,
-				"coinFlip":    coinFlip,
+				"seed":      seed,
+				"numbers":   numbers,
+				"threespot": threespot,
+				"alternate": alternate,
+				"coinFlip":  coinFlip,
+				"flipped":   n,
 			})
 		} else {
 			c.HTML(http.StatusOK, "index.tmpl", gin.H{
-				"seed":       seed,
-				"numbers":    numbers,
-				"alternate":  alternate,
-				"threespot":  threespot,
-				"coinFlip":   coinFlip,
+				"seed":      seed,
+				"numbers":   numbers,
+				"alternate": alternate,
+				"threespot": threespot,
+				"coinFlip":  coinFlip,
+				"flipped":   n,
 			})
 		}
 	})
