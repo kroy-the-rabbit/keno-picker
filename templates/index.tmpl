@@ -16,15 +16,17 @@
 </head>
 <body>
     <h2>Keno Picker</h2>
-    Seed: {{.seed}}<br><hr><br>
+    Seed: {{.seed}}<br>
+    Source: {{.source}}<br><hr><br>
     Result 1:<br> {{range .numbers}}<div>{{.}}</div>{{end}}
     <br><hr><br>
     Result 2:<br> {{range .alternate}}<div>{{.}}</div>{{end}}
     <br><hr><br>
     Three Spot:<br> {{range .threespot}}<div>{{.}}</div>{{end}}
     <br><hr><br>
-    Coin flip (H/T): {{if .coinFlip}}H{{else}}T{{end}}
+    Six Spot:<br> {{range .sixspot}}<div>{{.}}</div>{{end}}
     <br><hr><br>
+    Coin flip (H/T): {{if .coinFlip}}H{{else}}T{{end}}<br />
     Flipped:  {{.flipped}}
 </body>
 </html>
